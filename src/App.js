@@ -1,25 +1,75 @@
-import logo from './logo.svg';
+
 import './App.css';
+import _ from "lodash";
+import Card  from './component/Card'
+import {useState} from 'react'
+
+
+let x=0;
+
+
+
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+     
+
+        let[play,setplay]=useState(1);
+
+     
+        let [genre,setgen]=useState([]);
+         const clientId = 'b341ba0df51f4c8cb536155d5996bc87';
+            const clientSecret = 'abeadcc404d4411f918da5e19c1a18df';
+
+            const _getToken = async () => {
+               const result = await fetch('https://accounts.spotify.com/api/token', {
+                     method: 'POST',
+                     headers: {
+                        'Content-Type' : 'application/x-www-form-urlencoded', 
+                        'Authorization' : 'Basic ' + btoa(clientId + ':' + clientSecret)
+                     },
+                     body: 'grant_type=client_credentials'
+               });
+
+               const data = await result.json();
+               console.log("helo"+data.access_token);
+               _getGenres(data.access_token)
+
+            }
+            const _getGenres = async (token) => {
+
+               const result = await fetch(`https://api.spotify.com/v1/browse/categories?locale=sv_US`, {
+                     method: 'GET',
+                     headers: { 'Authorization' : 'Bearer ' + token}
+               });
+
+               const data = await result.json();
+               if(x==0){
+                    setgen(data["categories"]["items"]);
+                    x=1;
+               }
+              
+            }
+
+            
+            _getToken();
+            
+           
+            
+            return (
+               <div className='container'>
+   
+                  {genre.map((i)=>{
+                     let url=i["icons"][0]["url"]
+                     let name=i["name"];
+                     return(
+                     <Card  url={url} name={name} op={play}  funop={setplay}></Card>
+                     );
+                  })}
+                 
+               </div>
+            );
+            
+  
 }
 
 export default App;
